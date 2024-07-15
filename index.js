@@ -1,3 +1,6 @@
+require("dotenv").config()
+const Note = require('./models/note')
+
 const express = require('express')
 
 const app = express()
@@ -17,6 +20,9 @@ app.use(requestLogger)
 const cors = require('cors')
 app.use(cors())
 
+
+
+/* 
 let notes = [
   {
     id: 1,
@@ -34,10 +40,12 @@ let notes = [
     important: true
   }
 ]
-
+ */
 
 app.get('/api/notes', (request, response)=>{
-    response.json(notes)
+    Note.find({}).then(notes => {
+      response.json(notes)
+    })
 })
 
 app.get('/api/notes/:id', (request, response) => {
