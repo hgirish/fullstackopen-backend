@@ -49,20 +49,25 @@ app.get('/api/notes', (request, response)=>{
 })
 
 app.get('/api/notes/:id', (request, response) => {
-    const id =  Number(request.params.id)
-    const note = notes.find(note => note.id === id)
-    if (note) {
-        response.json(note)
-    } else {
-        response.status(404).end()
-    }    
+  Note.findById(request.params.id).then(note => {
+    response.json(note)
+  })
+  .catch(error => {
+    console.log(error.message)
+    response.status(400).end()
+  })
+    
 })
 
 app.delete('/api/notes/:id', (request, response) => {
-    const id = Number(request.params.id)
-    notes = notes.filter(note => note.id !== id)
-
+  Note.deleteOne(id=request.params.id)
+  .then(() => {
     response.status(204).end()
+  })
+  .catch(error => {
+    console.log(error.message)
+    response.status(400).end()
+  })
 })
 
 const generateId = () => {
@@ -81,14 +86,15 @@ app.post('/api/notes', (request, response) => {
   const note = {
     content: body.content,
     important : Boolean(body.important) || false,
-    id: generateId(),
-  }
-  notes = notes.concat(note)
    
-   response.json(note)
+  }
+  note.save().then(savedNote => {
+    response.json(savedNote)
+  }) 
 })
 
 app.put('/api/notes/:id', (request, response) => {
+ 
 	const body = request.body
 	const note = notes.find(note => note.id === body.id)
 	if (!note) {
