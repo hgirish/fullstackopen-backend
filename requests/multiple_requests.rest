@@ -24,3 +24,21 @@ Content-Type: application/json
 {
     "content": "Content without importance set"
 }
+
+### send request with validation error
+POST http://localhost:3001/api/notes
+Content-Type: application/json
+
+{
+    "content": "lol",
+    "important": true
+}
+
+### update number
+PUT http://localhost:3001/api/notes/66946ea303db2ecb66a27d59
+Content-Type: application/json
+
+{
+  "content": "HTML",
+  "important": true
+}
