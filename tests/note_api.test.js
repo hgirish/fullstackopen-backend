@@ -11,16 +11,36 @@ const Note = require('../models/note')
 beforeEach(async () => {
   await Note.deleteMany({})
 
-  let noteObject = new Note(helper.initialNotes[0])
-  await noteObject.save()
+  /*
+  console.log('cleared')
+ // this does not work.
+ // The problem is that every iteration of the forEach loop generates an asynchronous operation,
+ // and beforeEach won't wait for them to finish executing.
+  helper.initialNotes.forEach(async (note) => {
+    let noteObject = new Note(note)
+    await noteObject.save()
+    console.log('saved')
+  })
+  console.log('done')
+  */
 
-  noteObject = new Note(helper.initialNotes[1])
-  await noteObject.save()
+  /* // Promise.all
+  const noteObjects = helper.initialNotes.map(note => new Note(note))
+  const promiseArray = noteObjects.map(note => note.save())
+  await Promise.all(promiseArray)
+  */
+
+  for (let note of helper.initialNotes) {
+    let noteObject = new Note(note)
+    await noteObject.save()
+  }
+
 })
 
 const api = supertest(app)
 
 test('notes are returned as json', async () => {
+  console.log('entered test')
   await api
     .get('/api/notes')
     .expect(200)
