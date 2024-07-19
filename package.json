@@ -10,6 +10,7 @@
     "deploy": "fly deploy",
     "deploy:full": "npm run build:ui && npm run deploy",
     "logs:prod": "fly logs",
+    "mongo": "cross-env NODE_ENV=test node mongo.js",
     "lint": "eslint ."
   },
   "author": "Girish",
@@ -27,6 +28,7 @@
     "cross-env": "^7.0.3",
     "eslint": "^9.7.0",
     "globals": "^15.8.0",
-    "nodemon": "^3.1.4"
+    "nodemon": "^3.1.4",
+    "supertest": "^7.0.0"
   }
 }
