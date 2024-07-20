@@ -8,11 +8,32 @@ const app = require('../app')
 const api = supertest(app)
 const mongoose = require('mongoose')
 
+describe('when there are users in db', () => {
+  beforeEach(async() => {
+    await User.deleteMany({})
+
+    const passwordHash = await bcrypt.hash('sekret', 10)
+    const user = new User({ username: 'root', passwordHash })
+    await user.save()
+
+    const user2 = new User({ username: 'admin', passwordHash })
+    await user2.save()
+  })
+
+  test('returns 2 users', async () => {
+    const users = await helper.usersInDb()
+
+    assert.strictEqual(users.length, 2)
+    assert.strictEqual(users[0].username , 'root')
+    assert.strictEqual(users[1].username , 'admin')
+  })
+})
+
 describe('when there is initially one user in db', () => {
   beforeEach(async () => {
     await User.deleteMany({})
 
-    const passwordHash = await bcrypt.hashSync('sekret', 10)
+    const passwordHash = await bcrypt.hash('sekret', 10)
     const user = new User({ username: 'root', passwordHash })
 
     await user.save()
@@ -46,7 +67,7 @@ describe('when there is initially one user in db', () => {
   beforeEach(async () => {
     await User.deleteMany({})
 
-    const passwordHash = await bcrypt.hashSync('sekret', 10)
+    const passwordHash = await bcrypt.hash('sekret', 10)
     const user = new User({ username: 'root', passwordHash })
 
     await user.save()
@@ -78,7 +99,7 @@ describe('input validation', () => {
   beforeEach(async () => {
     await User.deleteMany({})
 
-    const passwordHash = await bcrypt.hashSync('sekret', 10)
+    const passwordHash = await bcrypt.hash('sekret', 10)
     const user = new User({ username: 'root', passwordHash })
 
     await user.save()
