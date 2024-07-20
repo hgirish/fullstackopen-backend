@@ -74,7 +74,90 @@ describe('when there is initially one user in db', () => {
   })
 })
 
+describe('input validation', () => {
+  beforeEach(async () => {
+    await User.deleteMany({})
 
+    const passwordHash = await bcrypt.hashSync('sekret', 10)
+    const user = new User({ username: 'root', passwordHash })
+
+    await user.save()
+  })
+
+  test('creation fails if username is short', async () => {
+
+    const usersAtStart = await helper.usersInDb()
+
+    const newUser = {
+      username: 'joe',
+      name: 'SuperUser',
+      password: 'salainen'
+    }
+
+    const result = await api
+      .post('/api/users')
+      .send(newUser)
+      .expect(400)
+      .expect('Content-Type', /application\/json/)
+
+    const usersAtEnd = await helper.usersInDb()
+    console.log('result.body', result.body.error)
+    //assert(result.body.error.includes('password should be at least 8 characters'))
+    assert(result.body.error.includes('Path `username` (`joe`) is shorter than the minimum allowed length (4)'))
+    assert.strictEqual(usersAtEnd.length, usersAtStart.length)
+
+  })
+
+  test('creation fails if username contains unpermissible characters', async () => {
+
+    const usersAtStart = await helper.usersInDb()
+
+    const newUser = {
+      username: 'joe$#!',
+      name: 'SuperUser',
+      password: 'salainen'
+    }
+
+    const result = await api
+      .post('/api/users')
+      .send(newUser)
+      .expect(400)
+      .expect('Content-Type', /application\/json/)
+
+    const usersAtEnd = await helper.usersInDb()
+    console.log('result.body', result.body.error)
+    const errorMessage = `username: ${newUser.username} is not a valid username`
+    //assert(result.body.error.includes('password should be at least 8 characters'))
+    assert(result.body.error.includes(errorMessage))
+    assert.strictEqual(usersAtEnd.length, usersAtStart.length)
+
+  })
+
+
+  test('creation fails if password is short', async () => {
+
+    const usersAtStart = await helper.usersInDb()
+
+    const newUser = {
+      username: 'superuser',
+      name: 'SuperUser',
+      password: 'sekret'
+    }
+
+    const result = await api
+      .post('/api/users')
+      .send(newUser)
+      .expect(400)
+      .expect('Content-Type', /application\/json/)
+
+    const usersAtEnd = await helper.usersInDb()
+    console.log('result.body', result.body.error)
+    assert(result.body.error.includes('password should be at least 8 characters'))
+    //assert(result.body.error.includes('Path `username` (`joe`) is shorter than the minimum allowed length (4)'))
+    assert.strictEqual(usersAtEnd.length, usersAtStart.length)
+
+  })
+})
 
 after(async () => {
   await mongoose.connection.close()

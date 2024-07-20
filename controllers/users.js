@@ -5,6 +5,10 @@ const User = require('../models/user')
 usersRouter.post('/', async (request,response) => {
   const { username, name, password } = request.body
 
+  if (password.length < 8 ){
+    return response.status(400).json({ error: 'password should be at least 8 characters' })
+  }
+
   const saltRounds = 10
   const passwordHash = await bcrypt.hashSync(password, saltRounds)
 

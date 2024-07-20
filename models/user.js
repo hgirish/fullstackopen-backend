@@ -4,6 +4,13 @@ const userSchema = new mongoose.Schema({
   username: {
     type: String,
     required: true,
+    minLength: 4,
+    validate: {
+      validator: function(v) {
+        return /^[a-zA-Z0-9_-]+$/.test(v)
+      },
+      message: props => `${props.value} is not a valid username`
+    } ,
     unique: true // this ensures the uniqueness of username
   },
   name: String,
