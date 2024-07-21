@@ -52,3 +52,13 @@ Content-Type: application/json
   "content": "HTML",
   "important": true
 }
+
+### new note without user
+POST http://localhost:3001/api/notes
+Content-Type: application/json
+
+{
+    "content": "note without user",
+    "important": true,
+    "userId" : "5a3d5da59070081a82a3445"
+}

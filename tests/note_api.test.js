@@ -5,9 +5,9 @@ const mongoose = require('mongoose')
 const helper = require('./test_helper')
 const supertest = require('supertest')
 const app = require('../app')
-
+const bcrypt = require('bcrypt')
 const Note = require('../models/note')
-
+const User = require('../models/user')
 beforeEach(async () => {
   await Note.deleteMany({})
 
@@ -77,6 +77,7 @@ describe('when there is initially some notes saved', () => {
 
 describe('viewing a specific note', () => {
 
+
   test('succeeds with a valid id', async () => {
     const notesAtStart = await helper.notesInDb()
 
@@ -109,11 +110,22 @@ describe('viewing a specific note', () => {
 })
 
 describe('addition of a new note', () => {
+  beforeEach(async () => {
+    await User.deleteMany({})
+
+    const passwordHash = await bcrypt.hash('sekret', 10)
+    const user = new User({ username: 'randomuser', passwordHash })
+
+    await user.save()
+  })
 
   test('succeeds with valid data', async () => {
+    const users = await helper.usersInDb()
+    const userId = users[0].id
     const newNote = {
       content: 'async/await simplifies making async calls',
       important: true,
+      userId: userId
     }
 
     await api
@@ -127,6 +139,58 @@ describe('addition of a new note', () => {
 
     const contents = notesAtEnd.map(n => n.content)
     assert(contents.includes('async/await simplifies making async calls'))
+  })
+
+  test('fails with status code 400 if data is invalid', async () => {
+    const newNote = {
+      important: true
+    }
+
+    await api
+      .post('/api/notes')
+      .send(newNote)
+      .expect(400)
+
+    const notesAtEnd = await helper.notesInDb()
+
+    assert.strictEqual(notesAtEnd.length, helper.initialNotes.length)
+  })
+
+  test('fails with status code 400 if user is not supplied', async () => {
+    const newNote = {
+      content: 'async/await simplifies making async calls',
+      important: true,
+    }
+
+    await api
+      .post('/api/notes')
+      .send(newNote)
+      .expect(400)
+
+
+    const notesAtEnd = await helper.notesInDb()
+
+    assert.strictEqual(notesAtEnd.length, helper.initialNotes.length)
+  })
+
+  test.only('fails with status code 400 if valid userId is not supplied', async () => {
+    const newNote = {
+      content: 'async/await simplifies making async calls',
+      important: true,
+      userId: '5a3d5da59070081a82a3445'
+    }
+
+    const result = await api
+      .post('/api/notes')
+      .send(newNote)
+      .expect(400)
+
+
+    const notesAtEnd = await helper.notesInDb()
+
+    assert.strictEqual(notesAtEnd.length, helper.initialNotes.length)
+    console.log('eror: ', result.body.error)
+    assert(result.body.error.includes('malformatted id'))
   })
 
   test('fails with status code 400 if data is invalid', async () => {
