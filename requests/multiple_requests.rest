@@ -9,6 +9,16 @@ Content-Type: application/json
     "important": true
 }
 
+### post with user
+POST http://localhost:3001/api/notes
+Content-Type: application/json
+
+{
+    "content": "User id of the note creator is at the start sent along with the request",
+    "important": true,
+    "userId": "669c4e6ea7103a35c56a8961"
+}
+
 ###
 POST http://localhost:3001/api/notes
 Content-Type: application/json
